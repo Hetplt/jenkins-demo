@@ -2,21 +2,25 @@ pipeline {
     agent any
 
     stages {
-        stage('Build') {
+
+        stage('Build Docker Image') {
             steps {
-                echo 'Building Application'
+                sh 'docker build -t het-cicd:v1 .'
             }
         }
 
-        stage('Test') {
+        stage('Deploy Container') {
             steps {
-                sh 'echo Testing Application'
+                sh '''
+                docker rm -f het-cicd || true
+                docker run -d --name het-cicd -p 8083:80 het-cicd:v1
+                '''
             }
         }
 
-        stage('Deploy') {
+        stage('Verify') {
             steps {
-                echo 'Deploying Application'
+                sh 'curl localhost:8083'
             }
         }
     }
